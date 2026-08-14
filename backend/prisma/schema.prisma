@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../libs/prisma/src/generated/prisma/client"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  name       String
+  department String
+  role       String   @default("staff")
+  avatar     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tasks Task[]
+
+  @@map("users")
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  userId      String
+  title       String
+  description String?   @db.NVarChar(Max)
+  date        String    // YYYY-MM-DD
+  category    String    @default("general")
+  priority    String    @default("medium")
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
