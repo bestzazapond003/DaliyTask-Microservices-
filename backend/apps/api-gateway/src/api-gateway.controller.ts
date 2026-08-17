@@ -1,5 +1,7 @@
+import { firstValueFrom } from 'rxjs';
 import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { EventsGateway } from './events.gateway';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { Public } from '../../../libs/common/src/decorators/public.decorator';
 import { CurrentUser } from '../../../libs/common/src/decorators/current-user.decorator';
@@ -12,6 +14,7 @@ export class ApiGatewayController {
     @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
     @Inject('TASK_SERVICE') private readonly taskClient: ClientProxy,
     @Inject('DASHBOARD_SERVICE') private readonly dashboardClient: ClientProxy,
+    private readonly eventsGateway: EventsGateway,
   ) {}
 
   // ==========================================

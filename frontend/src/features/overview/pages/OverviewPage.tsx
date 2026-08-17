@@ -1,3 +1,4 @@
+import { socketService, SocketRooms } from '../../../service/socketService';
 import React, { useEffect } from 'react';
 import {
   Container,
@@ -36,6 +37,13 @@ export const OverviewPage: React.FC = () => {
   useEffect(() => {
     dispatch(fetchUsers());
     dispatch(fetchTasks());
+
+    // ⚡ Join Team Overview Socket.IO Room for Real-Time Sync
+    socketService.joinRoom(SocketRooms.TEAM_OVERVIEW);
+
+    return () => {
+      socketService.leaveRoom(SocketRooms.TEAM_OVERVIEW);
+    };
   }, [dispatch, selectedUserId]);
 
   const handleUserFilterChange = (userId: string) => {

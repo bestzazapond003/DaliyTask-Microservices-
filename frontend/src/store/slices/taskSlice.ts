@@ -58,6 +58,23 @@ export const taskSlice = createSlice({
     setStatusFilter: (state, action: PayloadAction<string>) => {
       state.statusFilter = action.payload;
     },
+    taskCreatedRealtime: (state, action: PayloadAction<Task>) => {
+      const exists = state.tasks.some((t) => t.id === action.payload.id);
+      if (!exists) {
+        state.tasks.unshift(action.payload);
+      }
+    },
+    taskUpdatedRealtime: (state, action: PayloadAction<Task>) => {
+      const index = state.tasks.findIndex((t) => t.id === action.payload.id);
+      if (index !== -1) {
+        state.tasks[index] = action.payload;
+      } else {
+        state.tasks.unshift(action.payload);
+      }
+    },
+    taskDeletedRealtime: (state, action: PayloadAction<{ id: string }>) => {
+      state.tasks = state.tasks.filter((t) => t.id !== action.payload.id);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -92,5 +109,5 @@ export const taskSlice = createSlice({
   },
 });
 
-export const { setDateFilter, setSelectedUserId, setStatusFilter } = taskSlice.actions;
+export const { setDateFilter, setSelectedUserId, setStatusFilter, taskCreatedRealtime, taskUpdatedRealtime, taskDeletedRealtime } = taskSlice.actions;
 export default taskSlice.reducer;

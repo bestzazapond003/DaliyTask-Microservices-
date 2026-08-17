@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../../../libs/common/src/guards/jwt-auth.guard';
 import { JwtStrategy } from '../../../libs/common/src/guards/jwt.strategy';
 import { TransformInterceptor } from '../../../libs/common/src/interceptors/transform.interceptor';
 import { ApiGatewayController } from './api-gateway.controller';
+import { EventsGateway } from './events.gateway';
 
 @Module({
   imports: [
@@ -52,7 +53,7 @@ import { ApiGatewayController } from './api-gateway.controller';
     ]),
   ],
   controllers: [ApiGatewayController],
-  providers: [
+  providers: [EventsGateway, 
     JwtStrategy,
     {
       provide: APP_GUARD,

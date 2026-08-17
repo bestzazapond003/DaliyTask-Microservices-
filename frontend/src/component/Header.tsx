@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -31,6 +31,7 @@ import {
 import { useColorMode } from '../theme/ColorModeContext';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { logout } from '../store/slices/userSlice';
+import { socketService } from '../service/socketService';
 
 const roleColorMap = {
   admin: 'error' as const,
@@ -42,12 +43,24 @@ export function Header() {
   const { mode, toggleColorMode } = useColorMode();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const [isSocketLive, setIsSocketLive] = useState(false);
+  const [onlineCount, setOnlineCount] = useState<number | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
 
   const currentUser = useAppSelector((state) => state.user.currentUser);
+
+  useEffect(() => {
+    const s = socketService.getSocket();
+    if (s) {
+      setIsSocketLive(s.connected);
+      s.on('connect', () => setIsSocketLive(true));
+      s.on('disconnect', () => setIsSocketLive(false));
+      s.on('online_count', (data: { count: number }) => setOnlineCount(data.count));
+    }
+  }, []);
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpenDrawer(newOpen);
@@ -130,8 +143,24 @@ export function Header() {
           )}
         </Box>
 
-        {/* Right: Theme Toggle & Profile */}
+        {/* Right: Live Badge, Theme Toggle & Profile */}
         <Box className="flex items-center gap-3">
+          {/* Live WebSocket Status Indicator */}
+          <Tooltip title={isSocketLive ? `🟢 ระบบเชื่อมต่อเรียลไทม์ (ออนไลน์ ${onlineCount || 1} คน)` : '🔴 ขาดการเชื่อมต่อ WebSocket'}>
+            <Chip
+              size="small"
+              variant="outlined"
+              label={
+                <span className="flex items-center gap-1.5 font-bold text-[10px]">
+                  <span className={`w-2 h-2 rounded-full ${isSocketLive ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                  {isSocketLive ? 'Live' : 'Offline'}
+                </span>
+              }
+              color={isSocketLive ? 'success' : 'default'}
+              sx={{ height: 24, borderRadius: '12px' }}
+            />
+          </Tooltip>
+
           <Tooltip title={mode === 'dark' ? 'เปลี่ยนเป็นธีมสว่าง' : 'เปลี่ยนเป็นธีมมืด'}>
             <IconButton onClick={toggleColorMode} size="small" color="inherit">
               {mode === 'dark' ? <LightMode fontSize="small" /> : <DarkMode fontSize="small" />}
